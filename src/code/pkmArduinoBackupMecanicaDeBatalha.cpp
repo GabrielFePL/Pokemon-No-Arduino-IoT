@@ -14,8 +14,8 @@ int right = 0;
 int up = 0;
 int down = 0;
 
-const int DIST_SENSOR_TRIG = 7;
-const int DIST_SENSOR_ECHO = 6;
+const int DIST_SENSOR_TRIG = 3;
+const int DIST_SENSOR_ECHO = 5;
 float DIST_SENSOR_time = 0.0;
 float DIST_SENSOR_distance = 0.0;
 
