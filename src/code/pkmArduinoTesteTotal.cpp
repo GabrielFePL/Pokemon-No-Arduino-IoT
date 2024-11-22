@@ -1,3 +1,4 @@
+#include <DHT11.h>
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -14,10 +15,12 @@ int right = 0;
 int up = 0;
 int down = 0;
 
-const int DIST_SENSOR_TRIG = 7;
-const int DIST_SENSOR_ECHO = 6;
-float DIST_SENSOR_time = 0.0;
-float DIST_SENSOR_distance = 0.0;
+const int DIST_SENSOR_TRIG = 3;
+const int DIST_SENSOR_ECHO = 5;
+#define RAIN_SENSOR A3
+#define TEMPERATURE_SENSOR A2
+DHT11 TEMPERATURE_SENSOR_DHT11(TEMPERATURE_SENSOR);
+const int PRESENCE_SENSOR = 6;
 
 int firstIteration = 0;
 int turn = 0;
@@ -39,8 +42,6 @@ int player2PkmHp[6] = {5, 5, 5, 5, 5, 5};
 
 int actualPkm = playerActivePkm;
 
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
-
 void setup()
 {
   pinMode(saveButton, INPUT);
@@ -51,13 +52,13 @@ void setup()
   pinMode(downAxis, INPUT);
   pinMode(DIST_SENSOR_TRIG, OUTPUT);
   pinMode(DIST_SENSOR_ECHO, INPUT);
+  pinMode(RAIN_SENSOR, INPUT);
+  pinMode(PRESENCE_SENSOR, INPUT);
   lcd.init();
   lcd.backlight();
   lcd.clear();
   Serial.begin(9600);
 };
-
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
 
 void printPokemon(int pokemon, String command)
 {
@@ -253,8 +254,6 @@ void printPokemon(int pokemon, String command)
   delay(2000);
 };
 
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
-
 void changeActualPokemon(int player, String command)
 {
   int listPkm[6];
@@ -296,8 +295,6 @@ void changeActualPokemon(int player, String command)
     return;
   };
 };
-
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
 
 void printAtk()
 {
@@ -522,8 +519,6 @@ void printAtk()
   delay(2000);
 };
 
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
-
 void atkExecution()
 {
   int attacker;
@@ -601,22 +596,22 @@ void atkExecution()
   }
   else if (count == 2)
   {
-    Serial.println("ENTROU NO IF DO SENSOR DE DISTÂNCIA");
     delay(1000);
-    for (int i = 0; i < 500; i++)
+    float DIST_SENSOR_time = 0.0;
+    float DIST_SENSOR_distance = 0.0;
+    for (int i = 0; i < 100; i++)
     {
-      Serial.println("ENTROU NO FOR DO SENSOR DE DISTÂNCIA");
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       digitalWrite(DIST_SENSOR_TRIG, HIGH);
       delayMicroseconds(1);
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       DIST_SENSOR_time = pulseIn(DIST_SENSOR_ECHO, HIGH);
       DIST_SENSOR_distance = float(DIST_SENSOR_time * 0.0343) / 2;
-      if (DIST_SENSOR_distance < 50)
+      if (DIST_SENSOR_distance > 20 && DIST_SENSOR_distance < 100)
       {
         break;
       }
-      else if (i == 499)
+      else if (i == 99)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -638,7 +633,22 @@ void atkExecution()
   }
   else if (count == 3)
   {
-    // LÓGICA DO SENSOR DE CHUVA
+    float RAIN_SENSOR_umidity;
+    for (int i = 0; i < 100; i++)
+    {
+      RAIN_SENSOR_umidity = analogRead(RAIN_SENSOR);
+      RAIN_SENSOR_umidity = map(RAIN_SENSOR_umidity, 0, 1023, 0, 100);
+      if (RAIN_SENSOR_umidity > 50)
+      {
+        break;
+      }
+      else if (i == 99)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+    };
     if (deffender == 3)
     {
       damage = damage / 2;
@@ -650,7 +660,22 @@ void atkExecution()
   }
   else if (count == 4)
   {
-    // LÓGICA DO SENSOR DE TEMPERATURA
+    int TEMPERATURE_SENSOR_temperature;
+    for (int i = 0; i < 100; i++)
+    {
+      TEMPERATURE_SENSOR_temperature = TEMPERATURE_SENSOR_DHT11.readTemperature();
+      Serial.println(TEMPERATURE_SENSOR_temperature);
+      if (TEMPERATURE_SENSOR_temperature > 30)
+      {
+        break;
+      }
+      else if (i == 99)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+    };
     if (deffender == 3)
     {
       damage = damage / 2;
@@ -678,7 +703,22 @@ void atkExecution()
   }
   else if (count == 6)
   {
-    // LÓGICA DO SENSOR DE PRESENÇA
+    int PRESENCE_SENSOR_presence = 0;
+    for (int i = 0; i < 100; i++)
+    {
+      PRESENCE_SENSOR_presence = digitalRead(PRESENCE_SENSOR);
+      Serial.println(PRESENCE_SENSOR_presence);
+      if (PRESENCE_SENSOR_presence == 1)
+      {
+        break;
+      }
+      else if (i == 99)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+    };
     if (deffender == 1)
     {
       damage = 0;
@@ -712,8 +752,6 @@ void atkExecution()
     playerPkmHp[deffender - 1] = playerPkmHp[deffender - 1] - damage;
   };
 };
-
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
 
 void atkSelection()
 {
@@ -766,8 +804,6 @@ void atkSelection()
   };
 };
 
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
-
 void changeTurn()
 {
   if (turn == 0)
@@ -785,8 +821,6 @@ void changeTurn()
   lcd.print(turn + 1);
   delay(2000);
 };
-
-// TESTE TOTAL // TESTE TOTAL // TESTE TOTAL
 
 void loop()
 {
