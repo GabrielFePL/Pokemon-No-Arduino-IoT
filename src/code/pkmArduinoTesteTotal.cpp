@@ -20,7 +20,13 @@ const int DIST_SENSOR_ECHO = 5;
 #define RAIN_SENSOR A3
 #define TEMPERATURE_SENSOR A2
 DHT11 TEMPERATURE_SENSOR_DHT11(TEMPERATURE_SENSOR);
-const int PRESENCE_SENSOR = 6;
+#define INFRA_SENSOR A1
+const int PRESENCE_SENSOR = 7;
+
+const int ledRed = 11;
+const int ledGreen = 9;
+const int ledBlue = 10;
+const int buzzer = 6;
 
 int firstIteration = 0;
 int turn = 0;
@@ -54,6 +60,10 @@ void setup()
   pinMode(DIST_SENSOR_ECHO, INPUT);
   pinMode(RAIN_SENSOR, INPUT);
   pinMode(PRESENCE_SENSOR, INPUT);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledBlue, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   lcd.init();
   lcd.backlight();
   lcd.clear();
@@ -519,12 +529,22 @@ void printAtk()
   delay(2000);
 };
 
+void visualAndSoundEffects(int red, int green, int blue)
+{
+  digitalWrite(ledRed, red);
+  digitalWrite(ledGreen, green);
+  digitalWrite(ledBlue, blue);
+};
+
 void atkExecution()
 {
   int attacker;
   int deffender;
   String attackerName;
   String deffenderName;
+  int red;
+  int green;
+  int blue;
   if (turn == 0)
   {
     attacker = playerActivePkm;
@@ -589,6 +609,7 @@ void atkExecution()
   };
   if (count == 1)
   {
+    visualAndSoundEffects(255, 255, 255);
     if (deffender == 6)
     {
       damage = 0;
@@ -596,7 +617,6 @@ void atkExecution()
   }
   else if (count == 2)
   {
-    delay(1000);
     float DIST_SENSOR_time = 0.0;
     float DIST_SENSOR_distance = 0.0;
     for (int i = 0; i < 100; i++)
@@ -687,7 +707,21 @@ void atkExecution()
   }
   else if (count == 5)
   {
-    // LÓGICA DO SENSOR DE INFRAVERMELHO
+    int INFRA_SENSOR_signal = 0;
+    for (int i = 0; i < 100; i++)
+    {
+      INFRA_SENSOR_signal = analogRead(INFRA_SENSOR);
+      if (INFRA_SENSOR_signal > 0)
+      {
+        break;
+      }
+      else if (i == 99)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+    };
     if (deffender == 2)
     {
       damage = damage * 2;

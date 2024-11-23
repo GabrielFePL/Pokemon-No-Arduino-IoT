@@ -18,7 +18,13 @@ const int DIST_SENSOR_TRIG = 3;
 const int DIST_SENSOR_ECHO = 5;
 #define RAIN_SENSOR A3
 #define TEMPERATURE_SENSOR A2
-const int PRESENCE_SENSOR = 6;
+#define INFRA_SENSOR A1
+const int PRESENCE_SENSOR = 7;
+
+const int ledRed = 11;
+const int ledGreen = 9;
+const int ledBlue = 10;
+const int buzzer = 6;
 
 int firstIteration = 0;
 int turn = 0;
@@ -28,7 +34,7 @@ int atkType = 1;
 int damage = 2;
 String command = "null";
 
-int playerActivePkm = 3;
+int playerActivePkm = 1;
 int playerActualPkm = 0;
 int playerPkm[6] = {1, 2, 3, 4, 5, 6};
 int playerPkmHp[6] = {5, 5, 5, 5, 5, 5};
@@ -39,8 +45,6 @@ int player2Pkm[6] = {1, 2, 3, 4, 5, 6};
 int player2PkmHp[6] = {5, 5, 5, 5, 5, 5};
 
 int actualPkm = playerActivePkm;
-
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
 
 void setup()
 {
@@ -53,8 +57,11 @@ void setup()
   pinMode(DIST_SENSOR_TRIG, OUTPUT);
   pinMode(DIST_SENSOR_ECHO, INPUT);
   pinMode(RAIN_SENSOR, INPUT);
-  pinMode(TEMPERATURE_SENSOR, INPUT);
   pinMode(PRESENCE_SENSOR, INPUT);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledBlue, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   lcd.init();
   lcd.backlight();
   lcd.clear();
@@ -112,8 +119,6 @@ void changeActualPokemon(int player, String command)
     return;
   };
 };
-
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
 
 void printAtk()
 {
@@ -338,7 +343,12 @@ void printAtk()
   delay(2000);
 };
 
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
+void visualAndSoundEffects(int red, int green, int blue)
+{
+  digitalWrite(ledRed, red);
+  digitalWrite(ledGreen, green);
+  digitalWrite(ledBlue, blue);
+};
 
 void atkExecution()
 {
@@ -346,6 +356,9 @@ void atkExecution()
   int deffender;
   String attackerName;
   String deffenderName;
+  int red;
+  int green;
+  int blue;
   if (turn == 0)
   {
     attacker = playerActivePkm;
@@ -410,6 +423,7 @@ void atkExecution()
   };
   if (count == 1)
   {
+    visualAndSoundEffects(255, 255, 255);
     if (deffender == 6)
     {
       damage = 0;
@@ -419,10 +433,8 @@ void atkExecution()
   {
     float DIST_SENSOR_time = 0.0;
     float DIST_SENSOR_distance = 0.0;
-    Serial.println("ENTROU NO IF DO SENSOR DE DISTÂNCIA");
     for (int i = 0; i < 100; i++)
     {
-      Serial.println("ENTROU NO FOR DO SENSOR DE DISTÂNCIA");
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       digitalWrite(DIST_SENSOR_TRIG, HIGH);
       delayMicroseconds(1);
@@ -456,7 +468,7 @@ void atkExecution()
   else if (count == 3)
   {
     float RAIN_SENSOR_umidity;
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 100; i++)
     {
       RAIN_SENSOR_umidity = analogRead(RAIN_SENSOR);
       RAIN_SENSOR_umidity = map(RAIN_SENSOR_umidity, 0, 1023, 0, 100);
@@ -464,7 +476,7 @@ void atkExecution()
       {
         break;
       }
-      else if (i == 999)
+      else if (i == 99)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -482,8 +494,6 @@ void atkExecution()
   }
   else if (count == 4)
   {
-    
-    // LÓGICA DO SENSOR DE TEMPERATURA
     if (deffender == 3)
     {
       damage = damage / 2;
@@ -495,7 +505,21 @@ void atkExecution()
   }
   else if (count == 5)
   {
-    // LÓGICA DO SENSOR DE INFRAVERMELHO
+    int INFRA_SENSOR_signal = 0;
+    for (int i = 0; i < 100; i++)
+    {
+      INFRA_SENSOR_signal = analogRead(INFRA_SENSOR);
+      if (INFRA_SENSOR_signal > 0)
+      {
+        break;
+      }
+      else if (i == 99)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+    };
     if (deffender == 2)
     {
       damage = damage * 2;
@@ -512,15 +536,14 @@ void atkExecution()
   else if (count == 6)
   {
     int PRESENCE_SENSOR_presence = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 150; i++)
     {
       PRESENCE_SENSOR_presence = digitalRead(PRESENCE_SENSOR);
-      Serial.println(PRESENCE_SENSOR_presence);
       if (PRESENCE_SENSOR_presence == 1)
       {
         break;
       }
-      else if (i == 99)
+      else if (i == 149)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -561,8 +584,6 @@ void atkExecution()
   };
 };
 
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
-
 void atkSelection()
 {
   String atkType;
@@ -574,7 +595,7 @@ void atkSelection()
   else if (count == 2)
   {
     atkType = "Fight";
-    sensor = "de Distância";
+    sensor = "de Distancia";
   }
   else if (count == 3)
   {
@@ -594,7 +615,7 @@ void atkSelection()
   else if (count == 6)
   {
     atkType = "Ghost";
-    sensor = "de Presença";
+    sensor = "de Presenca";
   };
   lcd.clear();
   lcd.print("Ataque ");
@@ -605,7 +626,7 @@ void atkSelection()
   if (count != 1)
   {
     lcd.clear();
-    lcd.print("Rápido!!!");
+    lcd.print("Rapido!!!");
     delay(2000);
     lcd.clear();
     lcd.print("Acione o Sensor");
@@ -613,8 +634,6 @@ void atkSelection()
     lcd.print(sensor);
   };
 };
-
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
 
 void changeTurn()
 {
@@ -633,8 +652,6 @@ void changeTurn()
   lcd.print(turn + 1);
   delay(2000);
 };
-
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
 
 void loop()
 {
