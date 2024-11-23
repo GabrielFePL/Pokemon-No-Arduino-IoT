@@ -19,14 +19,14 @@ Outra mecânica pode ser utilizada para obter vantagem sobre o adversário, que 
 
 Botão - Ataque Normal
 Sensor de Proximidade - Ataque de Luta (1 pd, 1 pd pwm)
-Sendor de Pressão e Temperatura - Ataque de Fogo (2 pa)
+Sendor de Pressão e Temperatura - Ataque de Fogo (1 pa)
 Sensor de Chuva - Ataque de Água (1 pa)
 Sensor de Presença - Ataque Fantasma (1 pd)
 Sensor Infravermelho - Ataque Psíquico (1 pa)
 
 Joystick - Selecionar Ataques (2 pd)
 Botão - Salvar Ataque (1 pd)
-Buzzer - Efeitos Sonoros (1 pd)
+Buzzer - Efeitos Sonoros (1 pd pwm)
 Led RGB - Efeitos Visuais (3 pd pwm)
 LCD - Pixel Art (2 pa)
 
