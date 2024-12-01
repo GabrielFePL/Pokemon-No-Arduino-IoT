@@ -73,7 +73,7 @@ void setup()
 void printPokemon(int pokemon, String command)
 {
   lcd.print("pokemon");
-  delay(1000);
+  delay(500);
 };
 
 // MUTÁVEL // MUTÁVEL // MUTÁVEL
@@ -340,14 +340,97 @@ void printAtk()
   lcd.setCursor(4, 1);
   lcd.print("Multi: ");
   lcd.print(effectiveness);
-  delay(2000);
+  delay(500);
 };
 
-void visualAndSoundEffects(int red, int green, int blue)
+void attackExecutionVisualEffects(int redNum, int greenNum, int blueNum)
 {
-  digitalWrite(ledRed, red);
-  digitalWrite(ledGreen, green);
-  digitalWrite(ledBlue, blue);
+  analogWrite(ledRed, redNum);
+  analogWrite(ledGreen, greenNum);
+  analogWrite(ledBlue, blueNum);
+};
+
+void attackExecutionSound()
+{
+  if (count == 1)
+  {
+    int quickAttack = 400;
+    for (int i = 0; i < 15; i++)
+    {
+      quickAttack += 200;
+      tone(buzzer, quickAttack, 50);
+      delay(30);
+    }
+    noTone(buzzer);
+  }
+  else if (count == 2)
+  {
+    tone(buzzer, 800, 200);
+    delay(220);
+    for (int i = 800; i >= 400; i -= 35)
+    {
+      tone(buzzer, i, 50);
+      delay(50);
+    };
+    tone(buzzer, 0, 1);
+    noTone(buzzer);
+  }
+  else if (count == 3)
+  {
+    for (int i = 0; i < 50; i++)
+    {
+      int waterFreq = 450 + 100 * sin(0.1 * i);
+      tone(buzzer, waterFreq, 30);
+      delay(20);
+    };
+    noTone(buzzer);
+  }
+  else if (count == 4)
+  {
+    for (int i = 0; i < 50; i++)
+    {
+      int flameFreq = random(400, 800);
+      tone(buzzer, flameFreq, 30);
+      delay(20);
+    };
+    noTone(buzzer);
+  }
+  else if (count == 5)
+  {
+    for (int i = 0; i < 15; i++)
+    {
+      int psychicFreq = 600 + (i % 2 == 0 ? 200 : -200);
+      tone(buzzer, psychicFreq, 100);
+      delay(100);
+    };
+    for (int i = 800; i >= 400; i -= 50)
+    {
+      tone(buzzer, i, 50);
+      delay(50);
+    };
+    noTone(buzzer);
+  }
+  else if (count == 6)
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      int shadowFreq = 400 + (i % 3) * 100;
+      tone(buzzer, shadowFreq, 50);
+      delay(60);
+    };
+    for (int i = 800; i >= 300; i -= 100)
+    {
+      tone(buzzer, i, 70);
+      delay(70);
+    };
+    for (int i = 0; i < 10; i++)
+    {
+      int impactFreq = random(300, 700);
+      tone(buzzer, impactFreq, 50);
+      delay(50);
+    };
+    noTone(buzzer);
+  };
 };
 
 void atkExecution()
@@ -356,9 +439,9 @@ void atkExecution()
   int deffender;
   String attackerName;
   String deffenderName;
-  int red;
-  int green;
-  int blue;
+  int red = 0;
+  int green = 0;
+  int blue = 0;
   if (turn == 0)
   {
     attacker = playerActivePkm;
@@ -423,7 +506,9 @@ void atkExecution()
   };
   if (count == 1)
   {
-    visualAndSoundEffects(255, 255, 255);
+    red = 255;
+    green = 255;
+    blue = 255;
     if (deffender == 6)
     {
       damage = 0;
@@ -431,9 +516,10 @@ void atkExecution()
   }
   else if (count == 2)
   {
+    red = 15;
     float DIST_SENSOR_time = 0.0;
     float DIST_SENSOR_distance = 0.0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 80; i++)
     {
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       digitalWrite(DIST_SENSOR_TRIG, HIGH);
@@ -445,13 +531,19 @@ void atkExecution()
       {
         break;
       }
-      else if (i == 99)
+      else if (i == 79)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
+        attackExecutionVisualEffects(0, 0, 0);
         return;
       };
+      red += 3;
+      analogWrite(ledRed, red);
     };
+    red = 255;
+    green = 10;
+    blue = 0;
     if (deffender == 1)
     {
       damage = damage * 2;
@@ -467,8 +559,9 @@ void atkExecution()
   }
   else if (count == 3)
   {
+    red = 15;
     float RAIN_SENSOR_umidity;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 80; i++)
     {
       RAIN_SENSOR_umidity = analogRead(RAIN_SENSOR);
       RAIN_SENSOR_umidity = map(RAIN_SENSOR_umidity, 0, 1023, 0, 100);
@@ -480,9 +573,15 @@ void atkExecution()
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
+        attackExecutionVisualEffects(0, 0, 0);
         return;
       };
+      red += 3;
+      analogWrite(ledRed, red);
     };
+    red = 0;
+    green = 100;
+    blue = 255;
     if (deffender == 3)
     {
       damage = damage / 2;
@@ -494,6 +593,9 @@ void atkExecution()
   }
   else if (count == 4)
   {
+    red = 255;
+    green = 0;
+    blue = 0;
     if (deffender == 3)
     {
       damage = damage / 2;
@@ -505,6 +607,7 @@ void atkExecution()
   }
   else if (count == 5)
   {
+    red = 15;
     int INFRA_SENSOR_signal = 0;
     for (int i = 0; i < 100; i++)
     {
@@ -517,9 +620,15 @@ void atkExecution()
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
+        attackExecutionVisualEffects(0, 0, 0);
         return;
       };
+      red += 3;
+      analogWrite(ledRed, red);
     };
+    red = 200;
+    green = 0;
+    blue = 255;
     if (deffender == 2)
     {
       damage = damage * 2;
@@ -535,6 +644,7 @@ void atkExecution()
   }
   else if (count == 6)
   {
+    red = 15;
     int PRESENCE_SENSOR_presence = 0;
     for (int i = 0; i < 150; i++)
     {
@@ -547,9 +657,15 @@ void atkExecution()
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
+        attackExecutionVisualEffects(0, 0, 0);
         return;
       };
+      red += 3;
+      analogWrite(ledRed, red);
     };
+    red = 100;
+    green = 0;
+    blue = 255;
     if (deffender == 1)
     {
       damage = 0;
@@ -566,7 +682,10 @@ void atkExecution()
   lcd.clear();
   lcd.print(attackerName);
   lcd.print(" Ataca!");
-  delay(2500);
+  attackExecutionVisualEffects(red, green, blue);
+  attackExecutionSound();
+  delay(4000);
+  attackExecutionVisualEffects(0, 0, 0);
   lcd.clear();
   lcd.print(deffenderName);
   lcd.print(" Levou");
