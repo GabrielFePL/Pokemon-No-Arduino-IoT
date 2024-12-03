@@ -17,26 +17,21 @@ Outra mecânica pode ser utilizada para obter vantagem sobre o adversário, que 
 
 ## Componentes, Sensores, Funcionalidades e Quantidade de Portas Necessárias
 
-Botão - Ataque Normal
-Sensor de Proximidade - Ataque de Luta (1 pd, 1 pd pwm)
-Sendor de Pressão e Temperatura - Ataque de Fogo (1 pa)
-Sensor de Chuva - Ataque de Água (1 pa)
-Sensor de Presença - Ataque Fantasma (1 pd)
-Sensor Infravermelho - Ataque Psíquico (1 pa)
+Botão - Ataque Normal;
+Sensor de Proximidade - Ataque de Luta (1 pd, 1 pd pwm);
+Sendor de Pressão e Temperatura - Ataque de Fogo (1 pa);
+Sensor de Chuva - Ataque de Água (1 pa);
+Sensor de Presença - Ataque Fantasma (1 pd);
+Sensor Infravermelho - Ataque Psíquico (1 pa);
 
-Joystick - Selecionar Ataques (2 pd)
-Botão - Salvar Ataque (1 pd)
-Buzzer - Efeitos Sonoros (1 pd pwm)
-Led RGB - Efeitos Visuais (3 pd pwm)
-LCD - Pixel Art (2 pa)
+Joystick - Selecionar Ataques (2 pd);
+Botão - Selecionar e Cancelar Ações (1 pd);
+Buzzer - Efeitos Sonoros (1 pd pwm);
+Led RGB - Efeitos Visuais (3 pd pwm);
+LCD - Pixel Art e Visor (2 pa);
 
-Servo Motor - Acionar Hélice (1 pd)
-Hélice - Efeitos de Vento (ñ ocupa)
-
-Interruptor - Liga e Desliga (1 pd)
-
-Resistor
-Diodo
+Servo Motor - Acionar Hélice (1 pd);
+Hélice - Efeitos de Vento (não ocupa);
 
 ## Sprites Utilizados
 
