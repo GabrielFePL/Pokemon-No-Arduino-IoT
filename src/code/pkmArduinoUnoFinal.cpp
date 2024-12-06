@@ -40,10 +40,10 @@ public:
 #define _dottedsixtyfourth 0.09375
 #define _hemidemisemiquaver 0.0625
 #define _sixtyfourth 0.0625
-#define n_C5 523.25
-#define n_E5 659.25
-#define n_G5 783.99
-#define n_A5 880.00
+#define n_C5 3138.69
+#define n_E5 3955.5
+#define n_G5 4703.94
+#define n_A5 5280.00
 uint16_t bpm_QuarterNote = 120;
 Geekble_Note2Freq::Geekble_Note2Freq() {}
 unsigned long Geekble_Note2Freq::NoteLength(float _duration)
@@ -56,6 +56,7 @@ void Geekble_Note2Freq::Set_BPM_QuarterNote(uint16_t _BPM)
 }
 Geekble_Note2Freq note2freq;
 
+#include <DHT11.h>
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -76,8 +77,9 @@ const int DIST_SENSOR_TRIG = 3;
 const int DIST_SENSOR_ECHO = 5;
 #define RAIN_SENSOR A3
 #define TEMPERATURE_SENSOR A2
+DHT11 TEMPERATURE_SENSOR_DHT11(TEMPERATURE_SENSOR);
 #define INFRA_SENSOR A1
-const int PRESENCE_SENSOR = 7;
+#define PRESENCE_SENSOR A0
 
 const int ledRed = 11;
 const int ledGreen = 9;
@@ -98,7 +100,7 @@ int playerPkmHp[6] = {5, 5, 5, 5, 5, 5};
 
 int player2ActivePkm = 1;
 int player2ActualPkm = 0;
-int player2PkmHp[6] = {1, 5, 5, 5, 5, 5};
+int player2PkmHp[6] = {5, 5, 5, 5, 5, 5};
 
 int actualPkm = playerActivePkm;
 
@@ -133,8 +135,6 @@ void setup()
   Serial.begin(9600);
 };
 
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
-
 void executionVisualEffects(int redNum, int greenNum, int blueNum)
 {
   analogWrite(ledRed, redNum);
@@ -144,56 +144,219 @@ void executionVisualEffects(int redNum, int greenNum, int blueNum)
 
 void printPokemon(int pokemon, String command)
 {
+  byte pkmSprite[8][8];
+  String pkmName;
+  String pkmType;
+  int pkmHpPrint;
   executionVisualEffects(0, 0, 0);
   int red = 0;
   int green = 0;
   int blue = 0;
   if (pokemon == 1)
   {
-    lcd.print("Eevee");
+    byte eevee[8][8] = {
+        {B10010, B11011, B11110, B01100, B01100, B10000, B10010, B10101},
+        {B11111, B00000, B00000, B00000, B00000, B00000, B00000, B00001},
+        {B01000, B10000, B01101, B00010, B00000, B00000, B10001, B01000},
+        {B01000, B10011, B00111, B11110, B11000, B00011, B11100, B10000},
+        {B10111, B10010, B10000, B01000, B01000, B00100, B00011, B00000},
+        {B00001, B00000, B01000, B10000, B01110, B00000, B00000, B11111},
+        {B11000, B10000, B00000, B00001, B00001, B00010, B11100, B00000},
+        {B11000, B10100, B10010, B00001, B00011, B00010, B00010, B00010}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = eevee[j][i];
+      };
+    };
+    pkmName = "Eevee";
+    pkmType = "Normal";
     red = 255;
     green = 255;
     blue = 255;
   }
   else if (pokemon == 2)
   {
-    lcd.print("Machop");
+    byte machop[8][8] = {
+        {B00000, B00000, B00000, B00001, B00001, B00000, B00001, B00011},
+        {B00111, B01010, B10101, B01010, B01010, B11011, B01100, B00001},
+        {B11000, B10100, B00010, B01110, B10011, B00001, B11001, B11001},
+        {B00000, B00000, B00000, B00000, B00000, B00000, B10000, B10000},
+        {B00101, B00100, B00100, B00011, B00000, B00000, B00000, B00000},
+        {B00000, B10010, B01110, B00010, B11001, B01101, B01001, B01101},
+        {B01010, B00010, B00111, B00000, B10000, B10011, B10010, B10010},
+        {B01000, B00100, B00100, B00010, B11000, B00000, B00000, B00000}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = machop[j][i];
+      };
+    };
+    pkmName = "Machop";
+    pkmType = "Fight";
     red = 255;
     green = 10;
     blue = 0;
   }
   else if (pokemon == 3)
   {
-    lcd.print("Magikarp");
+    byte magikarp[8][8] = {
+        {B00000, B00001, B00010, B00010, B00100, B00111, B01111, B01100},
+        {B11111, B00000, B00110, B00101, B00111, B00011, B10000, B11001},
+        {B11100, B00001, B00001, B00001, B00001, B01100, B10000, B10000},
+        {B00000, B00010, B00010, B10010, B10011, B10000, B10000, B10001},
+        {B00100, B01100, B10110, B01011, B01001, B10100, B01010, B00101},
+        {B11010, B01101, B01100, B10000, B11000, B00110, B00001, B00000},
+        {B11000, B10101, B01010, B01011, B11011, B00100, B01011, B10100},
+        {B11111, B10111, B10000, B00000, B00000, B10000, B00000, B10000}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = magikarp[j][i];
+      };
+    };
+    pkmName = "Magikarp";
+    pkmType = "Water";
     red = 0;
     green = 100;
     blue = 255;
   }
   else if (pokemon == 4)
   {
-    lcd.print("Charmander");
+    byte charmander[8][8] = {
+        {B00001, B00010, B00100, B00100, B01000, B10001, B10001, B10000},
+        {B11100, B00010, B00001, B00001, B00000, B11000, B01000, B11000},
+        {B00000, B00000, B00000, B00000, B10000, B10000, B01000, B01000},
+        {B00100, B01010, B01001, B01001, B10010, B10110, B10110, B01111},
+        {B01000, B00110, B00001, B00000, B00000, B00001, B00000, B00000},
+        {B00000, B00000, B11001, B10010, B10001, B11000, B11100, B00000},
+        {B00100, B00010, B00011, B00001, B11001, B00001, B00011, B00000},
+        {B01010, B10010, B00100, B00100, B01000, B10000, B00000, B00000}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = charmander[j][i];
+      };
+    };
+    pkmName = "Charmander";
+    pkmType = "Fire";
     red = 255;
     green = 0;
     blue = 0;
   }
   else if (pokemon == 5)
   {
-    lcd.print("Mew");
+    byte mew[8][8] = {
+        {B00000, B00000, B00000, B00000, B00000, B00000, B01110, B01001},
+        {B00010, B00101, B00101, B00010, B00001, B00000, B01110, B10001},
+        {B01110, B10001, B00000, B11000, B00110, B11001, B00110, B00010},
+        {B00110, B10001, B10001, B01001, B00111, B00000, B10000, B10000},
+        {B01000, B01000, B10100, B10010, B10110, B10000, B01000, B00111},
+        {B00001, B00001, B01001, B10001, B11001, B00001, B00010, B11100},
+        {B11101, B00010, B00001, B00001, B11001, B00111, B11000, B00000},
+        {B00000, B00000, B00000, B10000, B01000, B00000, B11100, B00000}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = mew[j][i];
+      };
+    };
+    pkmName = "Mew";
+    pkmType = "Psychic";
     red = 255;
     green = 0;
     blue = 255;
   }
   else if (pokemon == 6)
   {
-    lcd.print("Gastly");
+    byte gastly[8][8] = {
+        {B00000, B00011, B00100, B00101, B01010, B11100, B11100, B11110},
+        {B11100, B00011, B01111, B10000, B00000, B00000, B00000, B00000},
+        {B00011, B10100, B01000, B11000, B00100, B00010, B00010, B01001},
+        {B00110, B10111, B01000, B01000, B10000, B10110, B01001, B00001},
+        {B11010, B11010, B01100, B00100, B00100, B00010, B00001, B00000},
+        {B00001, B00111, B01011, B11011, B01111, B00000, B10000, B01111},
+        {B11001, B11101, B11101, B11010, B00010, B00100, B11010, B10101},
+        {B00010, B00101, B00101, B00010, B00010, B00100, B01000, B10000}};
+    for (int j = 0; j < 8; j++)
+    {
+      for (int i = 0; i < 8; i++)
+      {
+        pkmSprite[j][i] = gastly[j][i];
+      };
+    };
+    pkmName = "Gastly";
+    pkmType = "Gho/Poi";
     red = 20;
     green = 0;
     blue = 255;
   };
   executionVisualEffects(red, green, blue);
+  if (command == "right")
+  {
+    if (turn == 0)
+    {
+      pkmHpPrint = playerPkmHp[pokemon - 1];
+      player = 1;
+    }
+    else if (turn == 1)
+    {
+      pkmHpPrint = player2PkmHp[pokemon - 1];
+      player = 2;
+    };
+  }
+  else if (command == "left")
+  {
+    if (turn == 1)
+    {
+      pkmHpPrint = playerPkmHp[pokemon - 1];
+      player = 1;
+    }
+    else if (turn == 0)
+    {
+      pkmHpPrint = player2PkmHp[pokemon - 1];
+      player = 2;
+    };
+  };
+  lcd.createChar(0, pkmSprite[0]);
+  lcd.createChar(1, pkmSprite[1]);
+  lcd.createChar(2, pkmSprite[2]);
+  lcd.createChar(3, pkmSprite[3]);
+  lcd.createChar(4, pkmSprite[4]);
+  lcd.createChar(5, pkmSprite[5]);
+  lcd.createChar(6, pkmSprite[6]);
+  lcd.createChar(7, pkmSprite[7]);
+  lcd.setCursor(0, 0);
+  lcd.write(byte(0));
+  lcd.setCursor(1, 0);
+  lcd.write(byte(1));
+  lcd.setCursor(2, 0);
+  lcd.write(byte(2));
+  lcd.setCursor(3, 0);
+  lcd.write(byte(3));
+  lcd.setCursor(0, 1);
+  lcd.write(byte(4));
+  lcd.setCursor(1, 1);
+  lcd.write(byte(5));
+  lcd.setCursor(2, 1);
+  lcd.write(byte(6));
+  lcd.setCursor(3, 1);
+  lcd.write(byte(7));
+  lcd.setCursor(5, 0);
+  lcd.print(pkmName);
+  lcd.setCursor(15, 0);
+  lcd.print(player);
+  lcd.setCursor(5, 1);
+  lcd.print(pkmType);
+  lcd.setCursor(13, 1);
+  lcd.print("HP");
+  lcd.print(pkmHpPrint);
 };
-
-// MUTÁVEL // MUTÁVEL // MUTÁVEL
 
 void changeActualPokemon(int player, String command)
 {
@@ -204,6 +367,10 @@ void changeActualPokemon(int player, String command)
   else if (player == 1)
   {
     actualPkm = player2ActualPkm;
+  };
+  if (actualPkm < 0)
+  {
+    actualPkm = 0;
   };
   actualPkm++;
   if (actualPkm > 6)
@@ -512,10 +679,10 @@ void attackExecutionSound()
 {
   if (count == 1)
   {
-    int quickAttack = 400;
+    int quickAttack = 3600;
     for (int i = 0; i < 15; i++)
     {
-      quickAttack += 200;
+      quickAttack += 150;
       tone(buzzer, quickAttack, 50);
       delay(30);
     }
@@ -523,9 +690,9 @@ void attackExecutionSound()
   }
   else if (count == 2)
   {
-    tone(buzzer, 800, 200);
+    tone(buzzer, 3200, 200);
     delay(220);
-    for (int i = 800; i >= 400; i -= 35)
+    for (int i = 3200; i >= 800; i -= 50)
     {
       tone(buzzer, i, 50);
       delay(50);
@@ -537,7 +704,7 @@ void attackExecutionSound()
   {
     for (int i = 0; i < 50; i++)
     {
-      int waterFreq = 450 + 100 * sin(0.1 * i);
+      int waterFreq = 3600 + 100 * sin(0.1 * i);
       tone(buzzer, waterFreq, 30);
       delay(20);
     };
@@ -547,7 +714,7 @@ void attackExecutionSound()
   {
     for (int i = 0; i < 50; i++)
     {
-      int flameFreq = random(400, 800);
+      int flameFreq = random(3600, 2700);
       tone(buzzer, flameFreq, 30);
       delay(20);
     };
@@ -557,7 +724,7 @@ void attackExecutionSound()
   {
     for (int i = 0; i < 15; i++)
     {
-      int psychicFreq = 600 + (i % 2 == 0 ? 200 : -200);
+      int psychicFreq = 3600 + (i % 2 == 0 ? 400 : -400);
       tone(buzzer, psychicFreq, 100);
       delay(100);
     };
@@ -572,7 +739,7 @@ void attackExecutionSound()
   {
     for (int i = 0; i < 20; i++)
     {
-      int shadowFreq = 400 + (i % 3) * 100;
+      int shadowFreq = 3600 + (i % 12) * 100;
       tone(buzzer, shadowFreq, 50);
       delay(60);
     };
@@ -583,7 +750,7 @@ void attackExecutionSound()
     };
     for (int i = 0; i < 10; i++)
     {
-      int impactFreq = random(300, 700);
+      int impactFreq = random(2700, 3600);
       tone(buzzer, impactFreq, 50);
       delay(50);
     };
@@ -677,7 +844,7 @@ void atkExecution()
     red = 15;
     float DIST_SENSOR_time = 0.0;
     float DIST_SENSOR_distance = 0.0;
-    for (int i = 0; i < 80; i++)
+    for (int i = 0; i < 300; i++)
     {
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       digitalWrite(DIST_SENSOR_TRIG, HIGH);
@@ -685,11 +852,12 @@ void atkExecution()
       digitalWrite(DIST_SENSOR_TRIG, LOW);
       DIST_SENSOR_time = pulseIn(DIST_SENSOR_ECHO, HIGH);
       DIST_SENSOR_distance = float(DIST_SENSOR_time * 0.0343) / 2;
+      Serial.println(DIST_SENSOR_distance);
       if (DIST_SENSOR_distance > 20 && DIST_SENSOR_distance < 100)
       {
         break;
       }
-      else if (i == 79)
+      else if (i == 299)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -719,15 +887,17 @@ void atkExecution()
   {
     red = 15;
     float RAIN_SENSOR_umidity;
-    for (int i = 0; i < 80; i++)
+    for (int i = 0; i < 300; i++)
     {
       RAIN_SENSOR_umidity = analogRead(RAIN_SENSOR);
-      RAIN_SENSOR_umidity = map(RAIN_SENSOR_umidity, 0, 1023, 0, 100);
-      if (RAIN_SENSOR_umidity > 50)
+      RAIN_SENSOR_umidity = map(RAIN_SENSOR_umidity, 1023, 0, 0, 100);
+      Serial.println(RAIN_SENSOR_umidity);
+      Serial.println(i);
+      if (RAIN_SENSOR_umidity > 50.0)
       {
         break;
       }
-      else if (i == 99)
+      else if (i == 299)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -751,6 +921,25 @@ void atkExecution()
   }
   else if (count == 4)
   {
+    red = 15;
+    int TEMPERATURE_SENSOR_temperature;
+    for (int i = 0; i < 300; i++)
+    {
+      TEMPERATURE_SENSOR_temperature = TEMPERATURE_SENSOR_DHT11.readTemperature();
+      Serial.println(TEMPERATURE_SENSOR_temperature);
+      if (TEMPERATURE_SENSOR_temperature >= 25)
+      {
+        break;
+      }
+      else if (i == 299)
+      {
+        lcd.clear();
+        lcd.print("O Ataque Falhou!");
+        return;
+      };
+      red += 3;
+      analogWrite(ledRed, red);
+    };
     red = 255;
     green = 0;
     blue = 0;
@@ -767,14 +956,14 @@ void atkExecution()
   {
     red = 15;
     int INFRA_SENSOR_signal = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 300; i++)
     {
       INFRA_SENSOR_signal = analogRead(INFRA_SENSOR);
       if (INFRA_SENSOR_signal > 0)
       {
         break;
       }
-      else if (i == 99)
+      else if (i == 299)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -804,14 +993,15 @@ void atkExecution()
   {
     red = 15;
     int PRESENCE_SENSOR_presence = 0;
-    for (int i = 0; i < 150; i++)
+    for (int i = 0; i < 300; i++)
     {
-      PRESENCE_SENSOR_presence = digitalRead(PRESENCE_SENSOR);
-      if (PRESENCE_SENSOR_presence == 1)
+      PRESENCE_SENSOR_presence = analogRead(PRESENCE_SENSOR);
+      Serial.println(PRESENCE_SENSOR_presence);
+      if (PRESENCE_SENSOR_presence != 0)
       {
         break;
       }
-      else if (i == 149)
+      else if (i == 299)
       {
         lcd.clear();
         lcd.print("O Ataque Falhou!");
@@ -842,7 +1032,7 @@ void atkExecution()
   lcd.print(" Ataca!");
   executionVisualEffects(red, green, blue);
   attackExecutionSound();
-  delay(4000);
+  delay(2000);
   executionVisualEffects(0, 0, 0);
   lcd.clear();
   lcd.print(deffenderName);
@@ -850,7 +1040,7 @@ void atkExecution()
   lcd.setCursor(0, 1);
   lcd.print(damage);
   lcd.print(" Pontos de Dano");
-  delay(2500);
+  delay(2000);
   if (turn == 0)
   {
     player2PkmHp[deffender - 1] = player2PkmHp[deffender - 1] - damage;
@@ -934,21 +1124,53 @@ void loop()
 {
   if (firstIteration == 0)
   {
+    int hp = 0;
     if (turn == 0)
     {
-      playerActualPkm = playerActivePkm;
-      player2ActualPkm = player2ActivePkm - 1;
-      printPokemon(playerActivePkm, "right");
-      cryPokemon(playerActivePkm);
+      hp = playerPkmHp[playerActivePkm - 1];
+      if (hp > 0)
+      {
+        playerActualPkm = playerActivePkm;
+        player2ActualPkm = player2ActivePkm - 1;
+        player = 1;
+        lcd.clear();
+        printPokemon(playerActivePkm, "right");
+        cryPokemon(playerActivePkm);
+        firstIteration = 1;
+      }
+      else
+      {
+        firstIteration = 0;
+        playerActivePkm++;
+        if (playerActivePkm > 6)
+        {
+          playerActivePkm = 1;
+        };
+      };
     }
     else if (turn == 1)
     {
-      playerActualPkm = playerActivePkm - 1;
-      player2ActualPkm = player2ActivePkm;
-      printPokemon(player2ActivePkm, "right");
-      cryPokemon(player2ActivePkm);
+      hp = player2PkmHp[player2ActivePkm - 1];
+      if (hp > 0)
+      {
+        playerActualPkm = playerActivePkm - 1;
+        player2ActualPkm = player2ActivePkm;
+        player = 2;
+        lcd.clear();
+        printPokemon(player2ActivePkm, "right");
+        cryPokemon(player2ActivePkm);
+        firstIteration = 1;
+      }
+      else
+      {
+        firstIteration = 0;
+        player2ActivePkm++;
+        if (player2ActivePkm > 6)
+        {
+          player2ActivePkm = 1;
+        };
+      };
     };
-    firstIteration = 1;
   };
   save = digitalRead(saveButton);
   close = digitalRead(closeButton);
@@ -975,9 +1197,9 @@ void loop()
         };
       };
       count++;
-      if (count == 6)
+      if (count > 6)
       {
-        count = 0;
+        count = 1;
       };
       int tempTurn = turn;
       if (turn == 0)
@@ -1023,8 +1245,6 @@ void loop()
       command = "right";
       changeActualPokemon(turn, command);
       lcd.clear();
-      Serial.println(actualPkm);
-      Serial.println(count);
       printPokemon(actualPkm, command);
       cryPokemon(actualPkm);
     }
@@ -1114,23 +1334,51 @@ void loop()
     };
     if (count == 0)
     {
+      int hp = 0;
+      hp = player2PkmHp[player2ActivePkm - 1];
       if (turn == 0)
       {
-        playerActualPkm = playerActivePkm;
-        player2ActualPkm = player2ActivePkm - 1;
-        player = 1;
-        lcd.clear();
-        printPokemon(playerActivePkm, "right");
-        cryPokemon(playerActivePkm);
+        hp = playerPkmHp[playerActivePkm - 1];
+        if (hp > 0)
+        {
+          playerActualPkm = playerActivePkm;
+          player2ActualPkm = player2ActivePkm - 1;
+          player = 1;
+          lcd.clear();
+          printPokemon(playerActivePkm, "right");
+          cryPokemon(playerActivePkm);
+        }
+        else
+        {
+          firstIteration = 0;
+          playerActivePkm++;
+          if (playerActivePkm > 6)
+          {
+            playerActivePkm = 1;
+          };
+        };
       }
       else if (turn == 1)
       {
-        playerActualPkm = playerActivePkm - 1;
-        player2ActualPkm = player2ActivePkm;
-        player = 2;
-        lcd.clear();
-        printPokemon(player2ActivePkm, "right");
-        cryPokemon(player2ActivePkm);
+        hp = player2PkmHp[player2ActivePkm - 1];
+        if (hp > 0)
+        {
+          playerActualPkm = playerActivePkm - 1;
+          player2ActualPkm = player2ActivePkm;
+          player = 2;
+          lcd.clear();
+          printPokemon(player2ActivePkm, "right");
+          cryPokemon(player2ActivePkm);
+        }
+        else
+        {
+          firstIteration = 0;
+          player2ActivePkm++;
+          if (player2ActivePkm > 6)
+          {
+            player2ActivePkm = 1;
+          };
+        };
       };
     };
   };
